@@ -53,7 +53,7 @@ class ProductoForm(forms.ModelForm):
     """
     class Meta:
         model = Producto
-        fields = ['nombre', 'descripcion', 'precio', 'stock', 'imagen', 'categoria_id', 'servicio_id']
+        fields = ['nombre', 'descripcion', 'precio', 'stock', 'imagen', 'categoria_id', 'categoria_web_id', 'servicio_id']
         widgets = {
             'nombre': forms.TextInput(attrs={
                 'class': 'form-control',
@@ -79,6 +79,7 @@ class ProductoForm(forms.ModelForm):
                 'accept': 'image/*'
             }),
             'categoria_id': forms.Select(attrs={'class': 'form-control'}),
+            'categoria_web_id': forms.Select(attrs={'class': 'form-control'}),
             'servicio_id': forms.Select(attrs={'class': 'form-control'}),
         }
         labels = {
@@ -87,22 +88,29 @@ class ProductoForm(forms.ModelForm):
             'precio': 'Precio (CLP)',
             'stock': 'Stock Disponible',
             'imagen': 'Imagen del Producto',
-            'categoria_id': 'Categoría',
+            'categoria_id': 'Categoría Inventario',
+            'categoria_web_id': 'Categoría Web (Catálogo)',
             'servicio_id': 'Servicio',
         }
     
     def __init__(self, *args, **kwargs):
         """Inicializa el formulario con categorías activas y servicios"""
         super().__init__(*args, **kwargs)
-        # Filtrar solo categorías activas
+        
+        # Filtrar solo categorías de inventario activas
         self.fields['categoria_id'].queryset = Categoria.objects.filter(estado='1').order_by('nombre')
-        # Agregar opción vacía
-        self.fields['categoria_id'].empty_label = "Seleccione una categoría"
-        # Hacer el campo requerido
+        self.fields['categoria_id'].empty_label = "Seleccione categoría inventario"
         self.fields['categoria_id'].required = True
         
-        # Importar Servicio y filtrar activos
-        from catalogo.models import Servicio
+        # Importar modelos de catalogo
+        from catalogo.models import Servicio, Categoria as CategoriaWeb
+        
+        # Filtrar categorías web activas
+        self.fields['categoria_web_id'].queryset = CategoriaWeb.objects.filter(estado='1').order_by('nombre')
+        self.fields['categoria_web_id'].empty_label = "Seleccione categoría web (opcional)"
+        self.fields['categoria_web_id'].required = False
+        
+        # Filtrar servicios activos
         self.fields['servicio_id'].queryset = Servicio.objects.filter(estado='1').order_by('nombre')
         self.fields['servicio_id'].empty_label = "Seleccione un servicio (opcional)"
         self.fields['servicio_id'].required = False

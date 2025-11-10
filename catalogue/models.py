@@ -22,7 +22,8 @@ class Producto(models.Model):
     precio = models.PositiveIntegerField(null=False, verbose_name="Precio")
     stock = models.PositiveIntegerField(null=False, verbose_name="Stock")
     imagen = models.ImageField(upload_to='productos/', default='productos/default.jpg', verbose_name="Imagen")
-    categoria_id = models.ForeignKey(Categoria, on_delete=models.PROTECT, limit_choices_to={'estado': '1'}, verbose_name="Categoría")
+    categoria_id = models.ForeignKey(Categoria, on_delete=models.PROTECT, limit_choices_to={'estado': '1'}, verbose_name="Categoría Inventario")
+    categoria_web_id = models.ForeignKey('catalogo.Categoria', on_delete=models.PROTECT, null=True, blank=True, verbose_name="Categoría Web", related_name='productos_inventario')
     servicio_id = models.ForeignKey('catalogo.Servicio', on_delete=models.PROTECT, null=True, blank=True, verbose_name="Servicio", related_name='productos_inventario')
     
     def __str__(self):
