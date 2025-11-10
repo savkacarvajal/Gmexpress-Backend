@@ -89,6 +89,16 @@ class ProductoForm(forms.ModelForm):
             'categoria_id': 'Categoría',
         }
     
+    def __init__(self, *args, **kwargs):
+        """Inicializa el formulario con categorías activas"""
+        super().__init__(*args, **kwargs)
+        # Filtrar solo categorías activas
+        self.fields['categoria_id'].queryset = Categoria.objects.filter(estado='1').order_by('nombre')
+        # Agregar opción vacía
+        self.fields['categoria_id'].empty_label = "Seleccione una categoría"
+        # Hacer el campo requerido
+        self.fields['categoria_id'].required = True
+    
     def clean_precio(self):
         """Valida que el precio sea mayor a 0"""
         precio = self.cleaned_data.get('precio')

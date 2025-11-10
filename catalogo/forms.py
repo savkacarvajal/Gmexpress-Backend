@@ -160,6 +160,19 @@ class ProductoWebForm(forms.ModelForm):
             'servicio': 'Servicio',
         }
     
+    def __init__(self, *args, **kwargs):
+        """Inicializa el formulario con categorías y servicios activos"""
+        super().__init__(*args, **kwargs)
+        # Filtrar solo categorías activas
+        self.fields['categoria'].queryset = Categoria.objects.filter(estado='1').order_by('nombre')
+        self.fields['categoria'].empty_label = "Seleccione una categoría"
+        self.fields['categoria'].required = True
+        
+        # Filtrar solo servicios activos
+        self.fields['servicio'].queryset = Servicio.objects.filter(estado='1').order_by('nombre')
+        self.fields['servicio'].empty_label = "Seleccione un servicio"
+        self.fields['servicio'].required = True
+    
     def clean_precio(self):
         """Valida que el precio sea mayor a 0"""
         precio = self.cleaned_data.get('precio')
