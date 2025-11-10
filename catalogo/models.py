@@ -37,7 +37,7 @@ class Producto(models.Model):
     precio = models.PositiveIntegerField(null=False, verbose_name="Precio")
     imagen = models.ImageField(upload_to='productos/', default='productos/default.jpg', verbose_name="Imagen")
     categoria = models.ForeignKey(Categoria, on_delete=models.PROTECT, verbose_name="Categoría")
-    servicio = models.ForeignKey(Servicio, on_delete=models.PROTECT, verbose_name="Servicio", null=True, blank=True)
+    servicio = models.ForeignKey(Servicio, on_delete=models.PROTECT, verbose_name="Servicio", null=True, blank=True, related_name='productos_catalogo')
     
     def __str__(self):
         return f"ID: {self.id} | NOMBRE: {self.nombre} | PRECIO: {self.precio}"
