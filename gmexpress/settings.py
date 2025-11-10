@@ -145,6 +145,10 @@ STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 # Directorio de archivos estáticos para producción (donde collectstatic los recopila)
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
+# Media files (User uploaded content)
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
 # Nota: STATIC_DIRS no es una configuración válida de Django y se elimina para evitar confusión.
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field

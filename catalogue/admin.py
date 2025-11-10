@@ -4,14 +4,13 @@ from .forms import CategoriaForm, ProductoForm
 
 class CategoriaAdmin(admin.ModelAdmin):
     form = CategoriaForm
-    list_display = ['nombre', 'estado', 'fecha_creacion']
-    list_filter = ['estado']
+    list_display = ['nombre', 'descripcion']
     search_fields = ['nombre']
 
 class ProductoAdmin(admin.ModelAdmin):
     form = ProductoForm
-    list_display = ['nombre', 'precio', 'stock', 'categoria_id', 'estado']
-    list_filter = ['estado', 'categoria_id']
+    list_display = ['nombre', 'precio', 'stock', 'categoria_id']
+    list_filter = ['categoria_id']
     search_fields = ['nombre']
 
 admin.site.register(Categoria, CategoriaAdmin)

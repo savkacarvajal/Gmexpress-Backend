@@ -1,5 +1,7 @@
 from django.contrib import admin
 from django.urls import path
+from django.conf import settings
+from django.conf.urls.static import static
 
 from empresa import views as vista
 from catalogo import views as catalogo_vista
@@ -71,3 +73,6 @@ urlpatterns = [
     path('servicios/<int:pk>/eliminar/', catalogo_vista.servicio_eliminar, name='servicio_eliminar'),
 ]
 
+# Servir archivos media en desarrollo
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
