@@ -67,7 +67,7 @@ def servicio_lista(request):
 def servicio_crear(request):
     """Vista para crear un nuevo servicio"""
     if request.method == 'POST':
-        form = ServicioForm(request.POST)
+        form = ServicioForm(request.POST, request.FILES)
         if form.is_valid():
             form.save()
             messages.success(request, 'Servicio creado exitosamente.')
@@ -85,7 +85,7 @@ def servicio_editar(request, pk):
     servicio = get_object_or_404(Servicio, pk=pk)
     
     if request.method == 'POST':
-        form = ServicioForm(request.POST, instance=servicio)
+        form = ServicioForm(request.POST, request.FILES, instance=servicio)
         if form.is_valid():
             form.save()
             messages.success(request, 'Servicio actualizado exitosamente.')

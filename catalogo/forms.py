@@ -15,9 +15,9 @@ class ServicioForm(forms.ModelForm):
                 'class': 'form-control',
                 'placeholder': 'Ej: Catering Corporativo'
             }),
-            'imagen': forms.TextInput(attrs={
+            'imagen': forms.FileInput(attrs={
                 'class': 'form-control',
-                'placeholder': 'Ej: catering.jpg (debe existir en static/images/)'
+                'accept': 'image/*'
             }),
             'servicio_tipo': forms.TextInput(attrs={
                 'class': 'form-control',
@@ -35,7 +35,7 @@ class ServicioForm(forms.ModelForm):
         }
         labels = {
             'nombre': 'Nombre del Servicio',
-            'imagen': 'Nombre del Archivo de Imagen',
+            'imagen': 'Imagen del Servicio',
             'servicio_tipo': 'Tipo de Servicio (slug)',
             'descripcion': 'Descripción',
             'estado': 'Estado',
@@ -144,9 +144,9 @@ class ProductoWebForm(forms.ModelForm):
                 'placeholder': 'Precio en pesos chilenos',
                 'min': 1
             }),
-            'imagen': forms.TextInput(attrs={
+            'imagen': forms.FileInput(attrs={
                 'class': 'form-control',
-                'placeholder': 'Ej: producto.jpg'
+                'accept': 'image/*'
             }),
             'categoria': forms.Select(attrs={'class': 'form-control'}),
             'servicio': forms.Select(attrs={'class': 'form-control'}),
@@ -155,7 +155,7 @@ class ProductoWebForm(forms.ModelForm):
             'nombre': 'Nombre del Producto',
             'descripcion': 'Descripción',
             'precio': 'Precio (CLP)',
-            'imagen': 'Nombre del Archivo de Imagen',
+            'imagen': 'Imagen del Producto',
             'categoria': 'Categoría',
             'servicio': 'Servicio',
         }

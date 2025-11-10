@@ -74,9 +74,9 @@ class ProductoForm(forms.ModelForm):
                 'placeholder': 'Cantidad disponible',
                 'min': 0
             }),
-            'imagen': forms.TextInput(attrs={
+            'imagen': forms.FileInput(attrs={
                 'class': 'form-control',
-                'placeholder': 'Ej: producto.jpg (debe existir en static/images/)'
+                'accept': 'image/*'
             }),
             'categoria_id': forms.Select(attrs={'class': 'form-control'}),
         }
@@ -85,7 +85,7 @@ class ProductoForm(forms.ModelForm):
             'descripcion': 'Descripción',
             'precio': 'Precio (CLP)',
             'stock': 'Stock Disponible',
-            'imagen': 'Nombre del Archivo de Imagen',
+            'imagen': 'Imagen del Producto',
             'categoria_id': 'Categoría',
         }
     

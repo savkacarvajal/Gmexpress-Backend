@@ -32,6 +32,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'storages',  # Para AWS S3
     'empresa',
     'catalogo',
     'usuarios',
@@ -166,6 +167,29 @@ if 'RDS_HOSTNAME' in os.environ:
     # Modo producción en AWS
     DEBUG = False
     ALLOWED_HOSTS = ['.elasticbeanstalk.com', '.amazonaws.com', '*']
+    
+    # ========== CONFIGURACIÓN AWS S3 PARA ARCHIVOS MEDIA ==========
+    # AWS S3 para almacenar imágenes subidas por usuarios
+    AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
+    AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
+    AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME', 'gmexpress-media')
+    AWS_S3_REGION_NAME = os.environ.get('AWS_S3_REGION_NAME', 'us-east-1')
+    
+    # Configuración de URLs para S3
+    AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
+    AWS_S3_OBJECT_PARAMETERS = {
+        'CacheControl': 'max-age=86400',
+    }
+    AWS_DEFAULT_ACL = 'public-read'
+    AWS_S3_FILE_OVERWRITE = False
+    AWS_QUERYSTRING_AUTH = False
+    
+    # Usar S3 para archivos media (imágenes subidas)
+    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+    MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/media/'
+    
+    # IMPORTANTE: Los archivos estáticos (CSS, JS) siguen usando collectstatic local
+    # Solo las imágenes subidas por usuarios van a S3
     
     # Opcional: Configuración para usar RDS MySQL en AWS
     # Descomenta si configuras una base de datos RDS
