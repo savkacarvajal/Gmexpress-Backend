@@ -31,9 +31,9 @@ def verificar_y_crear_datos():
     print(f"  Total tipos: {tipos_count}")
     if tipos_count == 0:
         print("  ⚠️  Creando tipos de usuario...")
-        TipoUsuario.objects.create(nombre='Administrador', descripcion='Usuario con acceso total', estado='1')
-        TipoUsuario.objects.create(nombre='Cliente', descripcion='Cliente del sistema', estado='1')
-        TipoUsuario.objects.create(nombre='Empleado', descripcion='Empleado de la empresa', estado='1')
+        TipoUsuario.objects.create(descripcion='Administrador', estado='1')
+        TipoUsuario.objects.create(descripcion='Cliente', estado='1')
+        TipoUsuario.objects.create(descripcion='Empleado', estado='1')
         print("  ✅ Tipos de usuario creados")
     
     # ===== CATALOGUE (Inventario) =====
