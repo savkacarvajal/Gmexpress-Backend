@@ -112,3 +112,125 @@ def servicio_eliminar(request, pk):
     
     context = {'servicio': servicio}
     return render(request, 'templateCatalogo/servicio_eliminar.html', context)
+
+
+# ==================== CRUD CATEGORÍA WEB ====================
+
+@login_required
+def categoria_web_lista(request):
+    """Vista para listar todas las categorías web"""
+    categorias = Categoria.objects.all().order_by('nombre')
+    context = {'categorias': categorias}
+    return render(request, 'templateCatalogo/categoria_web_lista.html', context)
+
+
+@login_required
+def categoria_web_crear(request):
+    """Vista para crear una nueva categoría web"""
+    if request.method == 'POST':
+        form = CategoriaWebForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Categoría web creada exitosamente.')
+            return redirect('categoria_web_lista')
+    else:
+        form = CategoriaWebForm()
+    
+    context = {'form': form, 'accion': 'Crear'}
+    return render(request, 'templateCatalogo/categoria_web_form.html', context)
+
+
+@login_required
+def categoria_web_editar(request, pk):
+    """Vista para editar una categoría web existente"""
+    categoria = get_object_or_404(Categoria, pk=pk)
+    
+    if request.method == 'POST':
+        form = CategoriaWebForm(request.POST, instance=categoria)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Categoría web actualizada exitosamente.')
+            return redirect('categoria_web_lista')
+    else:
+        form = CategoriaWebForm(instance=categoria)
+    
+    context = {'form': form, 'accion': 'Editar', 'categoria': categoria}
+    return render(request, 'templateCatalogo/categoria_web_form.html', context)
+
+
+@login_required
+def categoria_web_eliminar(request, pk):
+    """Vista para eliminar una categoría web"""
+    categoria = get_object_or_404(Categoria, pk=pk)
+    
+    if request.method == 'POST':
+        try:
+            categoria.delete()
+            messages.success(request, 'Categoría web eliminada exitosamente.')
+        except Exception as e:
+            messages.error(request, f'No se puede eliminar. Hay productos asociados. Error: {str(e)}')
+        return redirect('categoria_web_lista')
+    
+    context = {'categoria': categoria}
+    return render(request, 'templateCatalogo/categoria_web_eliminar.html', context)
+
+
+# ==================== CRUD PRODUCTO WEB ====================
+
+@login_required
+def producto_web_lista(request):
+    """Vista para listar todos los productos web"""
+    productos = Producto.objects.all().select_related('categoria', 'servicio').order_by('nombre')
+    context = {'productos': productos}
+    return render(request, 'templateCatalogo/producto_web_lista.html', context)
+
+
+@login_required
+def producto_web_crear(request):
+    """Vista para crear un nuevo producto web"""
+    if request.method == 'POST':
+        form = ProductoWebForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Producto web creado exitosamente.')
+            return redirect('producto_web_lista')
+    else:
+        form = ProductoWebForm()
+    
+    context = {'form': form, 'accion': 'Crear'}
+    return render(request, 'templateCatalogo/producto_web_form.html', context)
+
+
+@login_required
+def producto_web_editar(request, pk):
+    """Vista para editar un producto web existente"""
+    producto = get_object_or_404(Producto, pk=pk)
+    
+    if request.method == 'POST':
+        form = ProductoWebForm(request.POST, request.FILES, instance=producto)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Producto web actualizado exitosamente.')
+            return redirect('producto_web_lista')
+    else:
+        form = ProductoWebForm(instance=producto)
+    
+    context = {'form': form, 'accion': 'Editar', 'producto': producto}
+    return render(request, 'templateCatalogo/producto_web_form.html', context)
+
+
+@login_required
+def producto_web_eliminar(request, pk):
+    """Vista para eliminar un producto web"""
+    producto = get_object_or_404(Producto, pk=pk)
+    
+    if request.method == 'POST':
+        try:
+            producto.delete()
+            messages.success(request, 'Producto web eliminado exitosamente.')
+        except Exception as e:
+            messages.error(request, f'No se puede eliminar. Error: {str(e)}')
+        return redirect('producto_web_lista')
+    
+    context = {'producto': producto}
+    return render(request, 'templateCatalogo/producto_web_eliminar.html', context)

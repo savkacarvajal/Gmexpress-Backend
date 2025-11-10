@@ -1,0 +1,28 @@
+{% extends "base_crud.html" %}
+
+{% block title %}Eliminar Producto Web{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Eliminar Producto Web</h2>
+    
+    <div class="alert alert-danger">
+        <h4>¿Está seguro de que desea eliminar este producto web?</h4>
+        <p><strong>Nombre:</strong> {{ producto.nombre }}</p>
+        <p><strong>Precio:</strong> ${{ producto.precio|floatformat:0 }}</p>
+        <p><strong>Categoría:</strong> {{ producto.categoria.nombre }}</p>
+        <p><strong>Servicio:</strong> {{ producto.servicio.nombre }}</p>
+        <p class="mb-0"><small>Esta acción no se puede deshacer.</small></p>
+    </div>
+    
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">
+            <i class="fas fa-trash"></i> Eliminar
+        </button>
+        <a href="{% url 'producto_web_lista' %}" class="btn btn-secondary">
+            <i class="fas fa-times"></i> Cancelar
+        </a>
+    </form>
+</div>
+{% endblock %}

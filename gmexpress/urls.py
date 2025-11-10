@@ -71,6 +71,18 @@ urlpatterns = [
     path('servicios/crear/', catalogo_vista.servicio_crear, name='servicio_crear'),
     path('servicios/<int:pk>/editar/', catalogo_vista.servicio_editar, name='servicio_editar'),
     path('servicios/<int:pk>/eliminar/', catalogo_vista.servicio_eliminar, name='servicio_eliminar'),
+    
+    # ==================== CRUD PRODUCTOS WEB (CATÁLOGO) ====================
+    path('productos-web/', catalogo_vista.producto_web_lista, name='producto_web_lista'),
+    path('productos-web/crear/', catalogo_vista.producto_web_crear, name='producto_web_crear'),
+    path('productos-web/<int:pk>/editar/', catalogo_vista.producto_web_editar, name='producto_web_editar'),
+    path('productos-web/<int:pk>/eliminar/', catalogo_vista.producto_web_eliminar, name='producto_web_eliminar'),
+    
+    # ==================== CRUD CATEGORIAS WEB (CATÁLOGO) ====================
+    path('categorias-web/', catalogo_vista.categoria_web_lista, name='categoria_web_lista'),
+    path('categorias-web/crear/', catalogo_vista.categoria_web_crear, name='categoria_web_crear'),
+    path('categorias-web/<int:pk>/editar/', catalogo_vista.categoria_web_editar, name='categoria_web_editar'),
+    path('categorias-web/<int:pk>/eliminar/', catalogo_vista.categoria_web_eliminar, name='categoria_web_eliminar'),
 ]
 
 # Servir archivos media en desarrollo
