@@ -42,21 +42,21 @@ class UsuarioAdmin(admin.ModelAdmin):
     Administración de Usuarios con interfaz completa y acciones personalizadas
     """
     form = UsuarioForm
-    list_display = ['run', 'nombre_completo', 'correo', 'tipo_usuario_id', 'fecha_nacimiento', 'estado_display']
-    list_filter = ['tipo_usuario_id', 'fecha_nacimiento', 'fecha_creacion']
+    list_display = ['run', 'nombre_completo', 'correo', 'tipo_usuario', 'fecha_nacimiento', 'estado_display']
+    list_filter = ['tipo_usuario', 'fecha_nacimiento', 'fecha_registro']
     search_fields = ['run', 'nombre', 'paterno', 'materno', 'correo']
-    ordering = ['-fecha_creacion']
-    date_hierarchy = 'fecha_creacion'
+    ordering = ['-fecha_registro']
+    date_hierarchy = 'fecha_registro'
     
     fieldsets = (
         ('Información Personal', {
             'fields': ('run', 'nombre', 'paterno', 'materno')
         }),
         ('Información de Contacto', {
-            'fields': ('direccion', 'telefono', 'correo')
+            'fields': ('telefono', 'correo')
         }),
         ('Datos Adicionales', {
-            'fields': ('fecha_nacimiento', 'tipo_usuario_id')
+            'fields': ('fecha_nacimiento', 'tipo_usuario', 'contrasenia')
         }),
         ('Estado', {
             'fields': ('estado',),
