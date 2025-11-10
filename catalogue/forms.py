@@ -53,7 +53,7 @@ class ProductoForm(forms.ModelForm):
     """
     class Meta:
         model = Producto
-        fields = ['nombre', 'descripcion', 'precio', 'stock', 'imagen', 'categoria_id']
+        fields = ['nombre', 'descripcion', 'precio', 'stock', 'imagen', 'categoria_id', 'servicio_id']
         widgets = {
             'nombre': forms.TextInput(attrs={
                 'class': 'form-control',
@@ -79,6 +79,7 @@ class ProductoForm(forms.ModelForm):
                 'accept': 'image/*'
             }),
             'categoria_id': forms.Select(attrs={'class': 'form-control'}),
+            'servicio_id': forms.Select(attrs={'class': 'form-control'}),
         }
         labels = {
             'nombre': 'Nombre del Producto',
@@ -87,10 +88,11 @@ class ProductoForm(forms.ModelForm):
             'stock': 'Stock Disponible',
             'imagen': 'Imagen del Producto',
             'categoria_id': 'Categoría',
+            'servicio_id': 'Servicio',
         }
     
     def __init__(self, *args, **kwargs):
-        """Inicializa el formulario con categorías activas"""
+        """Inicializa el formulario con categorías activas y servicios"""
         super().__init__(*args, **kwargs)
         # Filtrar solo categorías activas
         self.fields['categoria_id'].queryset = Categoria.objects.filter(estado='1').order_by('nombre')
@@ -98,6 +100,12 @@ class ProductoForm(forms.ModelForm):
         self.fields['categoria_id'].empty_label = "Seleccione una categoría"
         # Hacer el campo requerido
         self.fields['categoria_id'].required = True
+        
+        # Importar Servicio y filtrar activos
+        from catalogo.models import Servicio
+        self.fields['servicio_id'].queryset = Servicio.objects.filter(estado='1').order_by('nombre')
+        self.fields['servicio_id'].empty_label = "Seleccione un servicio (opcional)"
+        self.fields['servicio_id'].required = False
     
     def clean_precio(self):
         """Valida que el precio sea mayor a 0"""

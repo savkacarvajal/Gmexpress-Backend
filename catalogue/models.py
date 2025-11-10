@@ -23,8 +23,10 @@ class Producto(models.Model):
     stock = models.PositiveIntegerField(null=False, verbose_name="Stock")
     imagen = models.ImageField(upload_to='productos/', default='productos/default.jpg', verbose_name="Imagen")
     categoria_id = models.ForeignKey(Categoria, on_delete=models.PROTECT, limit_choices_to={'estado': '1'}, verbose_name="Categoría")
+    servicio_id = models.ForeignKey('catalogo.Servicio', on_delete=models.PROTECT, null=True, blank=True, verbose_name="Servicio")
+    
     def __str__(self):
-        return f"ID: {self.id} | NOMBRE: {self.nombre} | DESCRIPCIÓN: {self.descripcion} | PRECIO: {self.precio} | STOCK: {self.stock} | IMAGEN: {self.imagen} | CATEGORÍA: {self.categoria_id}"
+        return f"ID: {self.id} | NOMBRE: {self.nombre} | DESCRIPCIÓN: {self.descripcion} | PRECIO: {self.precio} | STOCK: {self.stock}"
 
     class Meta:
         db_table = 'producto'
