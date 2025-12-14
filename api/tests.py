@@ -331,9 +331,11 @@ class VentaAPITestCase(TestCase):
                 }
             ]
         }, format='json')
-        if response.status_code != status.HTTP_201_CREATED:
-            print(f"Error creating venta: {response.data}")
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(
+            response.status_code, 
+            status.HTTP_201_CREATED,
+            f"Failed to create venta: {response.data}"
+        )
 
 
 class PaginationTestCase(TestCase):
