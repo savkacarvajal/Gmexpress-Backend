@@ -15,8 +15,10 @@
 GM-Express es una aplicación web desarrollada en Django 5.2.7 que proporciona un sistema integral de gestión para una empresa chilena de servicios de alimentación y catering. 
 
 ### **Características Principales:**
+- ✅ **API RESTful con JWT**: API completa con autenticación JWT (tokens de 60 min)
 - ✅ **Sistema de Autenticación**: Login/Logout con protección de vistas
 - ✅ **CRUD Completo**: Operaciones Create, Read, Update, Delete para todas las entidades
+- ✅ **Endpoints Públicos y Protegidos**: Control granular de permisos
 - ✅ **Validaciones de Negocio**: 
   - RUT chileno válido
   - Fechas en el pasado (no permitir fechas futuras)
@@ -27,6 +29,7 @@ GM-Express es una aplicación web desarrollada en Django 5.2.7 que proporciona u
 - ✅ **Panel Administrativo**: Dashboard con estadísticas y gestión completa
 - ✅ **Sitio Web Responsive**: Catálogo público con Bootstrap 5
 - ✅ **Base de Datos Poblada**: 50+ registros de prueba
+- ✅ **Tests Completos**: 20 tests unitarios para la API
 
 ---
 
@@ -35,7 +38,13 @@ GM-Express es una aplicación web desarrollada en Django 5.2.7 que proporciona u
 ```text
 GM-Express/
 │
-├── 📁 APLICACIONES (4 Apps Django)
+├── 📁 APLICACIONES (5 Apps Django)
+│   ├── api/               # 🔌 API RESTful con JWT
+│   │   ├── serializers.py # Serializers para todos los modelos
+│   │   ├── views.py       # ViewSets con permisos
+│   │   ├── urls.py        # Rutas de la API
+│   │   └── tests.py       # 20 tests unitarios
+│   │
 │   ├── usuarios/           # 👥 Gestión de usuarios y tipos
 │   │   ├── models.py       # Usuario, TipoUsuario
 │   │   ├── forms.py        # Formularios con validaciones
@@ -583,10 +592,621 @@ Dante's Inferno
 
 ---
 
+## 🔌 **API RESTful con Autenticación JWT**
+
+### **📖 Descripción de la API**
+
+El proyecto incluye una API RESTful completa con autenticación JWT que expone todos los recursos del sistema en formato JSON. La API está completamente documentada y lista para integrarse con aplicaciones externas (frontend React, aplicaciones móviles, etc.).
+
+### **🔑 Características de la API:**
+- ✅ **Autenticación JWT**: Tokens de acceso (60 min) y refresh (1 día)
+- ✅ **Endpoints RESTful**: CRUD completo para todas las entidades
+- ✅ **Permisos Granulares**: Públicos para consultas, protegidos para modificaciones
+- ✅ **Paginación**: 10 elementos por página por defecto
+- ✅ **Filtrado y Búsqueda**: Filtros por estado, categoría, servicio, etc.
+- ✅ **Validaciones**: Validaciones de negocio en todos los serializers
+- ✅ **Códigos HTTP**: Respuestas con códigos HTTP estándar (200, 201, 400, 401, 404)
+- ✅ **Tests Completos**: 20 tests unitarios que validan toda la funcionalidad
+
+### **🚀 Configuración de la API**
+
+La API está configurada en `/api/` con las siguientes características:
+
+```python
+# settings.py
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticatedOrReadOnly',
+    ),
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 10,
+}
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+}
+```
+
+---
+
+### **📍 Endpoints de la API**
+
+#### **🔐 Autenticación (público)**
+
+##### **Obtener Token JWT**
+```bash
+POST /api/auth/login/
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "admin123"
+}
+
+# Respuesta (200 OK)
+{
+  "access": "eyJ0eXAiOiJKV1QiLCJhbGc...",
+  "refresh": "eyJ0eXAiOiJKV1QiLCJhbGc..."
+}
+```
+
+##### **Renovar Token de Acceso**
+```bash
+POST /api/auth/refresh/
+Content-Type: application/json
+
+{
+  "refresh": "eyJ0eXAiOiJKV1QiLCJhbGc..."
+}
+
+# Respuesta (200 OK)
+{
+  "access": "eyJ0eXAiOiJKV1QiLCJhbGc..."
+}
+```
+
+##### **Verificar Token**
+```bash
+POST /api/auth/verify/
+Content-Type: application/json
+
+{
+  "token": "eyJ0eXAiOiJKV1QiLCJhbGc..."
+}
+
+# Respuesta (200 OK)
+{}
+```
+
+##### **Registro de Usuario**
+```bash
+POST /api/auth/register/
+Content-Type: application/json
+
+{
+  "run": "12345678-9",
+  "nombre": "Juan",
+  "paterno": "Pérez",
+  "materno": "González",
+  "correo": "juan@example.com",
+  "contrasenia": "Password123!",
+  "telefono": "+56912345678",
+  "fecha_nacimiento": "1990-01-01",
+  "tipo_usuario": 1
+}
+
+# Respuesta (201 Created)
+{
+  "message": "Usuario registrado exitosamente",
+  "usuario": {
+    "id": 1,
+    "nombre": "Juan Pérez González",
+    "correo": "juan@example.com"
+  }
+}
+```
+
+---
+
+#### **🌐 Servicios (GET público, modificaciones requieren JWT)**
+
+##### **Listar Servicios**
+```bash
+GET /api/servicios/
+
+# Respuesta (200 OK)
+{
+  "count": 6,
+  "next": null,
+  "previous": null,
+  "results": [
+    {
+      "id": 1,
+      "nombre": "Alimentación transportada",
+      "imagen": "http://localhost:8000/media/transporte.png",
+      "servicio_tipo": "transportado",
+      "descripcion": "Servicio de alimentación con transporte a domicilio",
+      "estado": "1"
+    }
+  ]
+}
+```
+
+##### **Obtener Servicio por ID**
+```bash
+GET /api/servicios/1/
+
+# Respuesta (200 OK)
+{
+  "id": 1,
+  "nombre": "Alimentación transportada",
+  "imagen": "http://localhost:8000/media/transporte.png",
+  "servicio_tipo": "transportado",
+  "descripcion": "Servicio de alimentación con transporte a domicilio",
+  "estado": "1"
+}
+```
+
+##### **Crear Servicio (requiere JWT)**
+```bash
+POST /api/servicios/
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+{
+  "nombre": "Catering Empresarial",
+  "servicio_tipo": "catering-empresarial",
+  "descripcion": "Servicio de catering para eventos empresariales",
+  "estado": "1"
+}
+
+# Respuesta (201 Created)
+{
+  "id": 7,
+  "nombre": "Catering Empresarial",
+  "imagen": null,
+  "servicio_tipo": "catering-empresarial",
+  "descripcion": "Servicio de catering para eventos empresariales",
+  "estado": "1"
+}
+```
+
+##### **Actualizar Servicio (requiere JWT)**
+```bash
+PUT /api/servicios/7/
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+{
+  "nombre": "Catering Corporativo",
+  "servicio_tipo": "catering-corporativo",
+  "descripcion": "Servicio actualizado",
+  "estado": "1"
+}
+
+# Respuesta (200 OK)
+```
+
+##### **Eliminar Servicio (requiere JWT)**
+```bash
+DELETE /api/servicios/7/
+Authorization: Bearer <access_token>
+
+# Respuesta (204 No Content)
+```
+
+##### **Filtrar Servicios por Estado**
+```bash
+GET /api/servicios/?estado=1
+
+# Respuesta: Solo servicios activos
+```
+
+---
+
+#### **📦 Productos Web (GET público, modificaciones requieren JWT)**
+
+##### **Listar Productos Web**
+```bash
+GET /api/productos-web/
+
+# Respuesta (200 OK)
+{
+  "count": 31,
+  "next": "http://localhost:8000/api/productos-web/?page=2",
+  "previous": null,
+  "results": [
+    {
+      "id": 1,
+      "nombre": "Almuerzo tradicional",
+      "descripcion": "Comida casera tradicional chilena",
+      "precio": 4500,
+      "imagen": "http://localhost:8000/media/Pasta%20al%20pesto.png",
+      "categoria": 1,
+      "categoria_nombre": "Almuerzos",
+      "servicio": 1,
+      "servicio_nombre": "Alimentación transportada"
+    }
+  ]
+}
+```
+
+##### **Filtrar Productos por Servicio**
+```bash
+GET /api/productos-web/?servicio=1
+
+# Respuesta: Solo productos del servicio con ID 1
+```
+
+##### **Filtrar Productos por Categoría**
+```bash
+GET /api/productos-web/?categoria=2
+
+# Respuesta: Solo productos de la categoría con ID 2
+```
+
+---
+
+#### **👥 Usuarios (requiere JWT)**
+
+##### **Listar Usuarios**
+```bash
+GET /api/usuarios/
+Authorization: Bearer <access_token>
+
+# Respuesta (200 OK)
+{
+  "count": 10,
+  "next": null,
+  "previous": null,
+  "results": [
+    {
+      "id": 1,
+      "run": "12345678-9",
+      "nombre": "Juan",
+      "paterno": "Pérez",
+      "materno": "González",
+      "correo": "juan@example.com",
+      "telefono": "+56912345678",
+      "fecha_nacimiento": "1990-01-01",
+      "fecha_registro": "2024-12-14T10:00:00Z",
+      "estado": "1",
+      "tipo_usuario": 1,
+      "tipo_usuario_nombre": "Cliente",
+      "nombre_completo": "Juan Pérez González"
+    }
+  ]
+}
+```
+
+##### **Obtener Usuario por ID**
+```bash
+GET /api/usuarios/1/
+Authorization: Bearer <access_token>
+
+# Respuesta (200 OK)
+```
+
+##### **Crear Usuario**
+```bash
+POST /api/usuarios/
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+{
+  "run": "98765432-1",
+  "nombre": "María",
+  "paterno": "González",
+  "materno": "López",
+  "correo": "maria@example.com",
+  "contrasenia": "Password123!",
+  "telefono": "+56987654321",
+  "fecha_nacimiento": "1995-05-15",
+  "tipo_usuario": 1,
+  "estado": "1"
+}
+
+# Respuesta (201 Created)
+```
+
+##### **Actualizar Usuario**
+```bash
+PUT /api/usuarios/1/
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+# Respuesta (200 OK)
+```
+
+##### **Eliminar Usuario**
+```bash
+DELETE /api/usuarios/1/
+Authorization: Bearer <access_token>
+
+# Respuesta (204 No Content)
+```
+
+---
+
+#### **💰 Ventas (requiere JWT)**
+
+##### **Listar Ventas**
+```bash
+GET /api/ventas/
+Authorization: Bearer <access_token>
+
+# Respuesta (200 OK)
+{
+  "count": 5,
+  "next": null,
+  "previous": null,
+  "results": [
+    {
+      "id": 1,
+      "fecha_venta": "2024-12-14",
+      "estado": "1",
+      "tipo_venta": "p",
+      "monto_total": 15000,
+      "usuario": 1,
+      "usuario_nombre": "Juan Pérez González",
+      "detalles": [
+        {
+          "id": 1,
+          "producto": 1,
+          "producto_nombre": "Almuerzo",
+          "precio_unitario": 5000,
+          "cantidad": 3,
+          "subtotal": 15000
+        }
+      ]
+    }
+  ]
+}
+```
+
+##### **Crear Venta con Detalles**
+```bash
+POST /api/ventas/
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+{
+  "fecha_venta": "2024-12-14",
+  "estado": "1",
+  "tipo_venta": "p",
+  "monto_total": 10000,
+  "usuario": 1,
+  "detalles": [
+    {
+      "producto": 1,
+      "precio_unitario": 5000,
+      "cantidad": 2
+    }
+  ]
+}
+
+# Respuesta (201 Created)
+```
+
+##### **Filtrar Ventas por Estado**
+```bash
+GET /api/ventas/?estado=1
+Authorization: Bearer <access_token>
+
+# Respuesta: Solo ventas pendientes
+```
+
+##### **Filtrar Ventas por Usuario**
+```bash
+GET /api/ventas/?usuario=1
+Authorization: Bearer <access_token>
+
+# Respuesta: Solo ventas del usuario con ID 1
+```
+
+---
+
+#### **📦 Productos Inventario (requiere JWT)**
+
+##### **Listar Productos Inventario**
+```bash
+GET /api/productos/
+Authorization: Bearer <access_token>
+
+# Respuesta (200 OK)
+{
+  "count": 31,
+  "results": [
+    {
+      "id": 1,
+      "nombre": "Almuerzo Ejecutivo",
+      "descripcion": "Almuerzo completo",
+      "precio": 5000,
+      "stock": 50,
+      "imagen": "http://localhost:8000/media/producto.png",
+      "categoria_id": 1,
+      "categoria_nombre": "Almuerzos",
+      "categoria_web_id": 1,
+      "categoria_web_nombre": "Almuerzos",
+      "servicio_id": 1,
+      "servicio_nombre": "Alimentación transportada"
+    }
+  ]
+}
+```
+
+---
+
+#### **📂 Categorías y Tipos de Usuario**
+
+##### **Tipos de Usuario (requiere JWT)**
+```bash
+GET /api/tipos-usuario/
+Authorization: Bearer <access_token>
+
+POST /api/tipos-usuario/
+Authorization: Bearer <access_token>
+```
+
+##### **Categorías Web (GET público)**
+```bash
+GET /api/categorias-web/
+```
+
+##### **Categorías Inventario (requiere JWT)**
+```bash
+GET /api/categorias/
+Authorization: Bearer <access_token>
+```
+
+---
+
+### **🧪 Tests de la API**
+
+El proyecto incluye 20 tests completos que validan toda la funcionalidad de la API:
+
+```bash
+# Ejecutar todos los tests
+python manage.py test api
+
+# Ejecutar tests específicos
+python manage.py test api.tests.JWTAuthenticationTestCase
+python manage.py test api.tests.ServicioAPITestCase
+python manage.py test api.tests.VentaAPITestCase
+```
+
+**Tests incluidos:**
+- ✅ Autenticación JWT (login, refresh, verify)
+- ✅ Endpoints públicos sin autenticación
+- ✅ Endpoints protegidos con JWT
+- ✅ Filtrado y paginación
+- ✅ Validaciones de datos
+- ✅ Códigos HTTP correctos
+- ✅ CRUD completo para todas las entidades
+
+---
+
+### **📝 Códigos de Estado HTTP**
+
+| Código | Significado | Uso en la API |
+|--------|-------------|---------------|
+| 200 OK | Petición exitosa | GET, PUT, PATCH |
+| 201 Created | Recurso creado | POST |
+| 204 No Content | Eliminación exitosa | DELETE |
+| 400 Bad Request | Datos inválidos | Validación fallida |
+| 401 Unauthorized | Sin autenticación | JWT inválido o ausente |
+| 403 Forbidden | Sin permisos | Falta de permisos |
+| 404 Not Found | Recurso no existe | ID inexistente |
+| 500 Server Error | Error del servidor | Error interno |
+
+---
+
+### **🔒 Seguridad de la API**
+
+- ✅ **Autenticación JWT**: Tokens seguros con expiración
+- ✅ **Permisos Granulares**: Control de acceso por endpoint
+- ✅ **Validaciones**: Sanitización de datos de entrada
+- ✅ **HTTPS**: Recomendado para producción
+- ✅ **CORS**: Configurable para frontend externo
+- ✅ **Rate Limiting**: Recomendado para producción
+
+---
+
+### **🌐 Integración con Frontend**
+
+#### **Ejemplo con JavaScript (Fetch API)**
+
+```javascript
+// Obtener token JWT
+async function login(username, password) {
+  const response = await fetch('http://localhost:8000/api/auth/login/', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ username, password }),
+  });
+  const data = await response.json();
+  localStorage.setItem('access_token', data.access);
+  localStorage.setItem('refresh_token', data.refresh);
+  return data;
+}
+
+// Obtener servicios (público)
+async function getServicios() {
+  const response = await fetch('http://localhost:8000/api/servicios/');
+  return await response.json();
+}
+
+// Crear usuario (protegido)
+async function createUsuario(userData) {
+  const token = localStorage.getItem('access_token');
+  const response = await fetch('http://localhost:8000/api/usuarios/', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+    body: JSON.stringify(userData),
+  });
+  return await response.json();
+}
+```
+
+#### **Ejemplo con Python (Requests)**
+
+```python
+import requests
+
+# Login
+response = requests.post('http://localhost:8000/api/auth/login/', json={
+    'username': 'admin',
+    'password': 'admin123'
+})
+tokens = response.json()
+access_token = tokens['access']
+
+# Obtener servicios
+response = requests.get('http://localhost:8000/api/servicios/')
+servicios = response.json()
+
+# Crear venta (con autenticación)
+headers = {'Authorization': f'Bearer {access_token}'}
+response = requests.post('http://localhost:8000/api/ventas/', 
+    headers=headers,
+    json={
+        'fecha_venta': '2024-12-14',
+        'estado': '1',
+        'tipo_venta': 'p',
+        'monto_total': 10000,
+        'usuario': 1,
+        'detalles': [
+            {'producto': 1, 'precio_unitario': 5000, 'cantidad': 2}
+        ]
+    }
+)
+```
+
+---
+
+### **📦 Paquetes Instalados para la API**
+
+```txt
+djangorestframework>=3.14.0
+djangorestframework-simplejwt>=5.3.0
+django-filter>=25.0
+```
+
+---
+
 <div align="center">
    <b>🎉 ¡Proyecto GM-Express completado exitosamente! 🎉</b>
    <br/>
-   <i>Desarrollado con Django 5.2.7 • Bootstrap 5 • SQLite/MySQL</i>
+   <i>Desarrollado con Django 5.2.7 • Django REST Framework • JWT • Bootstrap 5 • SQLite/MySQL</i>
 </div>
    <img src="static/images/servicio.png" alt="Servicio GM Express" width="120"/>
 </div>
